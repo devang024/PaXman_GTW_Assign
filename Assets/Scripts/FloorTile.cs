@@ -5,10 +5,10 @@ using UnityEngine;
 public class FloorTile : MonoBehaviour
 {
 
+    public List<FloorTile> Neighbours = new List<FloorTile>();
     public enum TileType
     {
-        Boundary,
-        Fixed,
+        Concrete,
         Tentative,
         Space
     }
@@ -26,7 +26,7 @@ public class FloorTile : MonoBehaviour
         {
             switch( value )
             {
-                case TileType.Boundary:
+                case TileType.Concrete:
                     GetComponent<SpriteRenderer>().color = Color.white;
                     break;
             }

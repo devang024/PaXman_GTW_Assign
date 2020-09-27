@@ -16,7 +16,18 @@ public class FloorMaker : MonoBehaviour
     public GameObject PrefabTile;
     public Transform TileParent;
 
-    public FloorTile[,] Grid;
+    public struct GridIndex
+    {
+        public int Xindex, YIndex;
+        public GridIndex(int xVal, int yVal)
+        {
+            this.Xindex = xVal;
+            this.YIndex = yVal;
+        }
+    }
+    public GridIndex _indexObj;
+    //public FloorTile[,] Grid;
+    public Dictionary<GridIndex, FloorTile> Grid;
 
     // Start is called before the first frame update
     void Start()
@@ -25,7 +36,7 @@ public class FloorMaker : MonoBehaviour
         {
             Rows = 30;Columns = 22;
         }
-        Grid = new FloorTile[Rows, Columns];
+        Grid = new Dictionary<GridIndex, FloorTile>();
         this.transform.localScale = new Vector3(Rows,Columns,this.transform.localScale.z);
 
         float offset = (((float)Columns) * (4.5f / 100.0f));//We offset the height of Grid by 5% of Columns number
@@ -38,22 +49,88 @@ public class FloorMaker : MonoBehaviour
     void PopulateTiles()
     {
         GameObject _tempObj;
+        _indexObj = new GridIndex();
         for( int Xindex=0;Xindex<Rows;Xindex++ )
         {
             for(int Yindex=0;Yindex<Columns;Yindex++)
             {
+                _indexObj.Xindex = Xindex;
+                _indexObj.YIndex = Yindex;
                 _tempObj = Instantiate(PrefabTile,TileParent) as GameObject;
                 if( _tempObj != null )
                 {
-                    Grid[Xindex, Yindex] = _tempObj.GetComponent<FloorTile>();
+                    //Grid[Xindex, Yindex] = _tempObj.GetComponent<FloorTile>();
+                    Grid.Add(_indexObj, _tempObj.GetComponent<FloorTile>());
                     _tempObj.transform.position = new Vector3(Xindex,Yindex,_tempObj.transform.position.z);
                     if ( Xindex == 0 || Yindex==0 || Xindex==Rows-1 || Yindex==Columns-1 )
                     {
-                        Grid[Xindex, Yindex].TileTypeGetSet = FloorTile.TileType.Boundary;
+                        Grid[_indexObj].TileTypeGetSet = FloorTile.TileType.Concrete;
                     }
                 }
             }
         }
+
+
+        GridIndex _neighbourIndex = new GridIndex();
+        /*Each Cell has 8 adjacent neighbours,we assign them into Array of Each CELL*/
+        for (int Xindex = 0; Xindex < Rows; Xindex++)
+        {            
+            for (int Yindex = 0; Yindex < Columns; Yindex++)
+            {
+                _indexObj.Xindex = Xindex;
+                _indexObj.YIndex = Yindex;
+                _neighbourIndex = new GridIndex(Xindex+1,Yindex+1);
+                if ( Grid.ContainsKey(_neighbourIndex) )
+                {
+                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                }
+
+                _neighbourIndex = new GridIndex(Xindex + 1, Yindex - 1);
+                if (Grid.ContainsKey(_neighbourIndex))
+                {
+                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                }
+
+                _neighbourIndex = new GridIndex(Xindex - 1, Yindex - 1);
+                if (Grid.ContainsKey(_neighbourIndex))
+                {
+                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                }
+
+                _neighbourIndex = new GridIndex(Xindex - 1, Yindex + 1);
+                if (Grid.ContainsKey(_neighbourIndex))
+                {
+                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                }
+
+                _neighbourIndex = new GridIndex(Xindex, Yindex + 1);
+                if (Grid.ContainsKey(_neighbourIndex))
+                {
+                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                }
+
+                _neighbourIndex = new GridIndex(Xindex, Yindex - 1);
+                if (Grid.ContainsKey(_neighbourIndex))
+                {
+                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                }
+
+                _neighbourIndex = new GridIndex(Xindex+1, Yindex );
+                if (Grid.ContainsKey(_neighbourIndex))
+                {
+                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                }
+
+                _neighbourIndex = new GridIndex(Xindex - 1, Yindex);
+                if (Grid.ContainsKey(_neighbourIndex))
+                {
+                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                }
+            }
+        }
+
+
+
     }
 
     // Update is called once per frame
