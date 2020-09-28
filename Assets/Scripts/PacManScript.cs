@@ -50,10 +50,14 @@ public class PacManScript : MonoBehaviour
             if (_tempPositionVector.x + xchange < XLimits.x)
             {
                 _tempPositionVector.x = 0.5f;
+                StopMe();
+                manager.makeConcreteTiles();
             }
             else if (_tempPositionVector.x + xchange > XLimits.y)
             {
                 _tempPositionVector.x = _rows - 0.5f;
+                StopMe();
+                manager.makeConcreteTiles();
             }
         }
 
@@ -69,10 +73,14 @@ public class PacManScript : MonoBehaviour
             if (_tempPositionVector.y + yChange < YLimits.x)
             {
                 _tempPositionVector.y = 0.5f;
+                StopMe();
+                manager.makeConcreteTiles();
             }
             else if (_tempPositionVector.y + yChange > YLimits.y)
             {
                 _tempPositionVector.y = _columns - 0.5f;
+                StopMe();
+                manager.makeConcreteTiles();
             }
         }
         
@@ -91,7 +99,9 @@ public class PacManScript : MonoBehaviour
                 _direction.x = 0f;
                 _direction.y = 1f;
                 this.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
-                this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
+                if (_entered == null)
+                    this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
+                else this.transform.position = new Vector2(_entered.transform.position.x + 0.5f, _entered.transform.position.y + 0.5f);
             }
         }
         if (Input.GetKeyDown(KeyCode.DownArrow))
@@ -102,7 +112,9 @@ public class PacManScript : MonoBehaviour
                 _direction.x = 0f;
                 _direction.y = -1f;
                 this.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
-                this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
+                if (_entered == null)
+                    this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
+                else this.transform.position = new Vector2(_entered.transform.position.x + 0.5f, _entered.transform.position.y + 0.5f);
             }
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -113,7 +125,9 @@ public class PacManScript : MonoBehaviour
                 _direction.x = -1f;
                 _direction.y = 0f;
                 this.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
-                this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
+                if (_entered == null)
+                    this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
+                else this.transform.position = new Vector2(_entered.transform.position.x + 0.5f, _entered.transform.position.y + 0.5f);
             }
         }
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -123,7 +137,9 @@ public class PacManScript : MonoBehaviour
                 _direction.x = 1f;
                 _direction.y = 0f;
                 this.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
+                if (_entered == null)
+                    this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
+                else this.transform.position = new Vector2( _entered.transform.position.x + 0.5f,_entered.transform.position.y+0.5f );
             }
         }
         MoveMe();
@@ -155,19 +171,18 @@ public class PacManScript : MonoBehaviour
     FloorTile _exited;
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (manager.gameState == GameSceneManager.GameState.GameStarted)
+        if ( manager.gameState == GameSceneManager.GameState.GameStarted )
         {
-            if (collision.gameObject.tag == GameSceneManager.TILE_TAG)
+            if ( collision.gameObject.tag == GameSceneManager.TILE_TAG )
             {
                 _exited = collision.gameObject.GetComponent<FloorTile>();
-
 
                 if (_exited != null)
                 {
                     if (_exited.TileTypeGetSet != FloorTile.TileType.Concrete  )
                     {
                         _exited.TileTypeGetSet = FloorTile.TileType.Tentative;
-                        manager.addToTentativeList(_entered);
+                        manager.addToTentativeList(_exited);
                     }
 
                     if (_entered.TileTypeGetSet == FloorTile.TileType.Concrete)

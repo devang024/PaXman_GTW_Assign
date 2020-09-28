@@ -80,29 +80,30 @@ public class FloorMaker : MonoBehaviour
             {
                 _indexObj.Xindex = Xindex;
                 _indexObj.YIndex = Yindex;
-                _neighbourIndex = new GridIndex(Xindex+1,Yindex+1);
-                if ( Grid.ContainsKey(_neighbourIndex) )
-                {
-                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
-                }
 
-                _neighbourIndex = new GridIndex(Xindex + 1, Yindex - 1);
-                if (Grid.ContainsKey(_neighbourIndex))
-                {
-                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
-                }
+                //_neighbourIndex = new GridIndex(Xindex+1,Yindex+1);
+                //if ( Grid.ContainsKey(_neighbourIndex) )
+                //{
+                //    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                //}
 
-                _neighbourIndex = new GridIndex(Xindex - 1, Yindex - 1);
-                if (Grid.ContainsKey(_neighbourIndex))
-                {
-                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
-                }
+                //_neighbourIndex = new GridIndex(Xindex + 1, Yindex - 1);
+                //if (Grid.ContainsKey(_neighbourIndex))
+                //{
+                //    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                //}
 
-                _neighbourIndex = new GridIndex(Xindex - 1, Yindex + 1);
-                if (Grid.ContainsKey(_neighbourIndex))
-                {
-                    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
-                }
+                //_neighbourIndex = new GridIndex(Xindex - 1, Yindex - 1);
+                //if (Grid.ContainsKey(_neighbourIndex))
+                //{
+                //    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                //}
+
+                //_neighbourIndex = new GridIndex(Xindex - 1, Yindex + 1);
+                //if (Grid.ContainsKey(_neighbourIndex))
+                //{
+                //    Grid[_indexObj].Neighbours.Add(Grid[_neighbourIndex]);
+                //}
 
                 _neighbourIndex = new GridIndex(Xindex, Yindex + 1);
                 if (Grid.ContainsKey(_neighbourIndex))

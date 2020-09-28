@@ -10,7 +10,8 @@ public class FloorTile : MonoBehaviour
     {
         Concrete,
         Tentative,
-        Space
+        Space,
+        Counting
     }
 
     TileType _tileType = TileType.Space;
@@ -36,6 +37,22 @@ public class FloorTile : MonoBehaviour
             }
             this._tileType = value;
         }
+    }
+
+    public int fillThis(TileType _tileType)
+    {
+        int retCount = 0;
+
+        foreach( var item in Neighbours )
+        {
+            if (item.TileTypeGetSet == TileType.Space)
+            {
+                item.TileTypeGetSet = _tileType;
+                retCount += 1 + item.fillThis(_tileType);
+            }
+        }
+
+        return retCount;
     }
 
     // Start is called before the first frame update
