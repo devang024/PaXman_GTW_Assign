@@ -29,6 +29,10 @@ public class FloorTile : MonoBehaviour
                 case TileType.Concrete:
                     GetComponent<SpriteRenderer>().color = Color.white;
                     break;
+
+                case TileType.Tentative:
+                    GetComponent<SpriteRenderer>().color = new Color(1f,1f,1f,0.5f);
+                    break;
             }
             this._tileType = value;
         }

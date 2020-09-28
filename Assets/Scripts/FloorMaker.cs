@@ -44,6 +44,7 @@ public class FloorMaker : MonoBehaviour
 
         SceneCam.transform.position = new Vector3((float)Rows*0.5f, (float)Columns*0.5f ,SceneCam.transform.position.z);
         PopulateTiles();
+        FindObjectOfType<GameSceneManager>().gameState = GameSceneManager.GameState.GameStarted;
     }
 
     void PopulateTiles()
@@ -129,9 +130,9 @@ public class FloorMaker : MonoBehaviour
             }
         }
 
-
-
     }
+
+
 
     // Update is called once per frame
     void Update()
