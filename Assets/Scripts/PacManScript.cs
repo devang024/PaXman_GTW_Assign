@@ -84,86 +84,89 @@ public class PacManScript : MonoBehaviour
     int Xindex, Yindex;
     private void FixedUpdate()
     {
-        Xindex = Mathf.FloorToInt(this.transform.position.x);
-        Yindex = Mathf.FloorToInt(this.transform.position.y);
-        FloorMaker.GridIndex _gIndex = new FloorMaker.GridIndex(Xindex, Yindex);
+        if ( manager.gameState == GameSceneManager.GameState.GameStarted )
+        {
+            Xindex = Mathf.FloorToInt(this.transform.position.x);
+            Yindex = Mathf.FloorToInt(this.transform.position.y);
+            FloorMaker.GridIndex _gIndex = new FloorMaker.GridIndex(Xindex, Yindex);
 #if UNITY_EDITOR || UNITY_STANDALONE
 
-        if ( Input.GetKeyDown(KeyCode.UpArrow) )
-        {
-            //MoveMe(0f,1f);
-            if ( _direction.y==0f || onTheFloor )
+            if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                _direction.x = 0f;
-                _direction.y = 1f;
-                this.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
-                this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
-                    manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
+                //MoveMe(0f,1f);
+                if (_direction.y == 0f || onTheFloor)
+                {
+                    _direction.x = 0f;
+                    _direction.y = 1f;
+                    this.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+                    this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
+                        manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
 
+                }
             }
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            if ( _direction.y==0f || onTheFloor)
+            if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                //MoveMe(0f,-1f);
-                _direction.x = 0f;
-                _direction.y = -1f;
-                this.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
-                this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
-                    manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
-                
+                if (_direction.y == 0f || onTheFloor)
+                {
+                    //MoveMe(0f,-1f);
+                    _direction.x = 0f;
+                    _direction.y = -1f;
+                    this.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
+                    this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
+                        manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
+
+                }
             }
-        }
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            if ( _direction.x==0f || onTheFloor)
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                //MoveMe(-1f,0f);
-                _direction.x = -1f;
-                _direction.y = 0f;
-                this.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
-                this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
-                    manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
+                if (_direction.x == 0f || onTheFloor)
+                {
+                    //MoveMe(-1f,0f);
+                    _direction.x = -1f;
+                    _direction.y = 0f;
+                    this.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
+                    this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
+                        manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
+                }
             }
-        }
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            if ( _direction.x==0f || onTheFloor)
+            if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                _direction.x = 1f;
-                _direction.y = 0f;
-                this.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
-                    manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
-                
+                if (_direction.x == 0f || onTheFloor)
+                {
+                    _direction.x = 1f;
+                    _direction.y = 0f;
+                    this.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+                    this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
+                        manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
+
+                }
             }
-        }
 
 #elif (UNITY_ANDROID || UNITY_IOS)
         
 #endif
 
-        MoveMe();
+            MoveMe();
 
-        /*Following is tile changing logic block*/
-        {
-            if (manager.floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Concrete)
+            /*Following is tile changing logic block*/
             {
-                if (!onTheFloor)
+                if (manager.floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Concrete)
                 {
-                    StopMe();
-                    manager.makeConcreteTiles();
+                    if (!onTheFloor)
+                    {
+                        StopMe();
+                        manager.makeConcreteTiles();
+                    }
+                    onTheFloor = true;
                 }
-                onTheFloor = true;
-            }
-            else
-            {
-                onTheFloor = false;
-                if (manager.floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Space)
+                else
                 {
-                    manager.floorMaker.Grid[_gIndex].TileTypeGetSet = FloorTile.TileType.Tentative;
-                    manager.addToTentativeList(manager.floorMaker.Grid[_gIndex]);
+                    onTheFloor = false;
+                    if (manager.floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Space)
+                    {
+                        manager.floorMaker.Grid[_gIndex].TileTypeGetSet = FloorTile.TileType.Tentative;
+                        manager.addToTentativeList(manager.floorMaker.Grid[_gIndex]);
+                    }
                 }
             }
         }

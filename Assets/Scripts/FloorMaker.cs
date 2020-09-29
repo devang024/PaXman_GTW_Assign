@@ -42,9 +42,9 @@ public class FloorMaker : MonoBehaviour
         float offset = (((float)Columns) * (4.5f / 100.0f));//We offset the height of Grid by 5% of Columns number
         SceneCam.orthographicSize = (Columns / 2) + offset;
 
-        SceneCam.transform.position = new Vector3((float)Rows*0.5f, (float)Columns*0.5f ,SceneCam.transform.position.z);
+        SceneCam.transform.position = new Vector3((float)Rows*0.5f, (float)Columns*0.535f ,SceneCam.transform.position.z);
         PopulateTiles();
-        FindObjectOfType<GameSceneManager>().gameState = GameSceneManager.GameState.GameStarted;
+        
     }
 
     void PopulateTiles()

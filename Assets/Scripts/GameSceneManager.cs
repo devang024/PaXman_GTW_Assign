@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameSceneManager : MonoBehaviour
 {
+    public GameObject InstructionPanelUI;
+    public Text Lives, Progress;
     public const bool LOGGING = false;
     public enum GameState
     {
@@ -20,6 +23,15 @@ public class GameSceneManager : MonoBehaviour
     public const string TILE_TAG = "FloorTile";
 
     List<FloorTile> TentativeTileList = new List<FloorTile>();
+    int lives = 3;
+
+    public void StartGame()
+    {
+        gameState = GameState.GameStarted;
+        InstructionPanelUI.SetActive(false);
+        Lives.text = "Lives : "+lives.ToString();
+        checkGameEnd();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -55,23 +67,19 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
+    /* in the following method...
+     */
     public void makeConcreteTiles()
     {
-        foreach( var item in TentativeTileList )
+        int counter = 0;
+        FloorTile _seed = null;
+        foreach ( var item in TentativeTileList )
         {
             item.TileTypeGetSet = FloorTile.TileType.Concrete;
-        }
-
-
-        
-        FloorTile _seed=null;
-        if (TentativeTileList.Count > 0)
-        {
-            _seed = getSeed(0);
             if (_seed == null)
             {
                 resettingGridAfterCounting();
-                _seed = getSeed(TentativeTileList.Count - 1);
+                _seed = getSeed(counter);
             }
         }
 
@@ -85,6 +93,31 @@ public class GameSceneManager : MonoBehaviour
         
 
         TentativeTileList.Clear();
+        checkGameEnd();
+
+    }
+
+    void checkGameEnd()
+    {
+        int total = floorMaker.Rows * floorMaker.Columns;
+        int concreteCounter = 0;
+        foreach( var item in floorMaker.Grid )
+        {
+            if ( item.Value.TileTypeGetSet == FloorTile.TileType.Concrete )
+            {
+                concreteCounter++;
+            }
+        }
+
+        float progress = ((float)concreteCounter) / ((float)total);
+        Progress.text = "Progress : "+(Mathf.FloorToInt(progress * 100f)+ "/" + "80%");
+
+        if (progress >= 0.8f )
+        {
+            gameState = GameState.GameFinished;
+            Debug.LogError("GameFinished");
+        }
+        else Debug.Log("Counter:"+concreteCounter);
     }
 
     FloorTile getSeed(int index)
