@@ -59,31 +59,54 @@ public class GameSceneManager : MonoBehaviour
             item.TileTypeGetSet = FloorTile.TileType.Concrete;
         }
 
-        int seedIndex = 0;
-        FloorTile[] _Seeds = new FloorTile[2];
-        foreach (var item in TentativeTileList[0].Neighbours)
+
+        
+        FloorTile _seed=null;
+        if (TentativeTileList.Count > 0)
         {
-            if (item.TileTypeGetSet == FloorTile.TileType.Space)
+            _seed = getSeed(0);
+            if (_seed == null)
             {
-                _Seeds[seedIndex] = item;
-                seedIndex++;
-                //Debug.Log("Count:" + item.fillThis(FloorTile.TileType.Counting));
+                resettingGridAfterCounting();
+                _seed = getSeed(TentativeTileList.Count - 1);
             }
         }
-
-        seedIndex = -1;
-        if (_Seeds[0].fillThis(FloorTile.TileType.Counting) < _Seeds[1].fillThis(FloorTile.TileType.Counting))
-            seedIndex = 0;
-        else if (_Seeds[0].fillThis(FloorTile.TileType.Counting) > _Seeds[1].fillThis(FloorTile.TileType.Counting))
-            seedIndex = 1;
 
         resettingGridAfterCounting();
 
         /*In case, if both area is same, we dont do anything*/
-        if (seedIndex!=-1)
-        _Seeds[seedIndex].fillThis(FloorTile.TileType.Concrete);
+        if (_seed != null)
+        {
+            _seed.fillThis(FloorTile.TileType.Concrete);
+        }
         
 
         TentativeTileList.Clear();
+    }
+
+    FloorTile getSeed(int index)
+    {
+        int lastTileCounter = floorMaker.Rows * floorMaker.Columns;
+        FloorTile _seed=null;
+        int seedNeighbours = 0;
+        foreach (var item in TentativeTileList[index].Neighbours)
+        {
+            if (item.TileTypeGetSet == FloorTile.TileType.Space)
+            {
+                seedNeighbours++;
+                int currentTileCounter = item.fillThis(FloorTile.TileType.Counting);
+                if (lastTileCounter > currentTileCounter)
+                {
+                    _seed = item;
+                    lastTileCounter = currentTileCounter;
+                }
+                //Debug.Log("Count:" + item.fillThis(FloorTile.TileType.Counting));
+            }
+        }
+        if (seedNeighbours <= 1)
+        {
+            _seed = null;
+        }
+        return _seed;
     }
 }

@@ -49,15 +49,11 @@ public class PacManScript : MonoBehaviour
         {
             if (_tempPositionVector.x + xchange < XLimits.x)
             {
-                _tempPositionVector.x = 0.5f;
-                StopMe();
-                manager.makeConcreteTiles();
+                _tempPositionVector.x = 0.5f;                
             }
             else if (_tempPositionVector.x + xchange > XLimits.y)
             {
-                _tempPositionVector.x = _rows - 0.5f;
-                StopMe();
-                manager.makeConcreteTiles();
+                _tempPositionVector.x = _rows - 0.5f;                
             }
         }
 
@@ -72,15 +68,11 @@ public class PacManScript : MonoBehaviour
         {
             if (_tempPositionVector.y + yChange < YLimits.x)
             {
-                _tempPositionVector.y = 0.5f;
-                StopMe();
-                manager.makeConcreteTiles();
+                _tempPositionVector.y = 0.5f;                
             }
             else if (_tempPositionVector.y + yChange > YLimits.y)
             {
-                _tempPositionVector.y = _columns - 0.5f;
-                StopMe();
-                manager.makeConcreteTiles();
+                _tempPositionVector.y = _columns - 0.5f;                
             }
         }
         
@@ -158,8 +150,11 @@ public class PacManScript : MonoBehaviour
             if (collision.gameObject.tag == GameSceneManager.TILE_TAG)
             {
                 _entered = collision.gameObject.GetComponent<FloorTile>();
+                
                 if (_entered.TileTypeGetSet == FloorTile.TileType.Concrete)
                 {
+                    //_entered.gameObject.GetComponent<SpriteRenderer>().color = Color.red;                    
+
                     onTheFloor = true;
                 }
                 else onTheFloor = false;
@@ -179,22 +174,25 @@ public class PacManScript : MonoBehaviour
 
                 if (_exited != null)
                 {
-                    if (_exited.TileTypeGetSet != FloorTile.TileType.Concrete  )
+                    if (_exited.TileTypeGetSet != FloorTile.TileType.Concrete)
                     {
                         _exited.TileTypeGetSet = FloorTile.TileType.Tentative;
                         manager.addToTentativeList(_exited);
-                    }
-
-                    if (_entered.TileTypeGetSet == FloorTile.TileType.Concrete)
-                    {
-                        if (_exited.TileTypeGetSet == FloorTile.TileType.Tentative)
+                        int Xindex = Mathf.FloorToInt(this.transform.position.x);
+                        int Yindex = Mathf.FloorToInt(this.transform.position.y);
+                        //Debug.Log("X:" + Xindex + " && Y:" + Yindex);
+                        FloorMaker.GridIndex _gIndex = new FloorMaker.GridIndex(Xindex,Yindex);
+                        if (manager.floorMaker.Grid.ContainsKey(_gIndex))
                         {
-                            StopMe();
-                            manager.makeConcreteTiles();
+                            if (manager.floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Concrete)
+                            //if ( manager.floorMaker.Grid[_gIndex].GetComponent<SpriteRenderer>().bounds.Contains(this.transform.position) )
+                            {
+                                StopMe();
+                                manager.makeConcreteTiles();
+                            }                            
                         }
                     }
-
-                }                
+                }
             }            
         }
     }

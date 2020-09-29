@@ -499,9 +499,9 @@ GameObject:
   m_Component:
   - component: {fileID: 997063077}
   - component: {fileID: 997063079}
-  - component: {fileID: 997063078}
   - component: {fileID: 997063080}
   - component: {fileID: 997063081}
+  - component: {fileID: 997063078}
   m_Layer: 0
   m_Name: Pacman
   m_TagString: Untagged
@@ -523,8 +523,8 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!58 &997063078
-CircleCollider2D:
+--- !u!61 &997063078
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -537,8 +537,18 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1.28, y: 1.28}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
   serializedVersion: 2
-  m_Radius: 0.1
+  m_Size: {x: 0.3, y: 0.3}
+  m_EdgeRadius: 0
 --- !u!212 &997063079
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -623,5 +633,5 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
   m_Constraints: 0
