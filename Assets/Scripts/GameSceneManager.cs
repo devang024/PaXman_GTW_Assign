@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GameSceneManager : MonoBehaviour
 {
+    public const bool LOGGING = false;
     public enum GameState
     {
         Initializing,
@@ -26,15 +27,17 @@ public class GameSceneManager : MonoBehaviour
         //Application.targetFrameRate = 60;
     }
 
+    [Range(0f,4f)]
+    public float timeScale = 1.0f;
     // Update is called once per frame
     void Update()
     {
-        
+        Time.timeScale = timeScale;
     }
 
     public void addToTentativeList(FloorTile _tileScript)
     {
-        if (_tileScript != null)
+        if ( _tileScript != null )
         {
             TentativeTileList.Add(_tileScript);
         }

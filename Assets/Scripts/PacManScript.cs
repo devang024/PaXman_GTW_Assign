@@ -79,8 +79,14 @@ public class PacManScript : MonoBehaviour
         this.transform.position = _tempPositionVector;
     }
 
-    void Update()
+
+
+    int Xindex, Yindex;
+    private void FixedUpdate()
     {
+        Xindex = Mathf.FloorToInt(this.transform.position.x);
+        Yindex = Mathf.FloorToInt(this.transform.position.y);
+        FloorMaker.GridIndex _gIndex = new FloorMaker.GridIndex(Xindex, Yindex);
 #if UNITY_EDITOR || UNITY_STANDALONE
 
         if ( Input.GetKeyDown(KeyCode.UpArrow) )
@@ -91,9 +97,9 @@ public class PacManScript : MonoBehaviour
                 _direction.x = 0f;
                 _direction.y = 1f;
                 this.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
-                if (_entered == null)
-                    this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
-                else this.transform.position = new Vector2(_entered.transform.position.x + 0.5f, _entered.transform.position.y + 0.5f);
+                this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
+                    manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
+
             }
         }
         if (Input.GetKeyDown(KeyCode.DownArrow))
@@ -104,9 +110,9 @@ public class PacManScript : MonoBehaviour
                 _direction.x = 0f;
                 _direction.y = -1f;
                 this.transform.rotation = Quaternion.Euler(0f, 0f, 270f);
-                if (_entered == null)
-                    this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
-                else this.transform.position = new Vector2(_entered.transform.position.x + 0.5f, _entered.transform.position.y + 0.5f);
+                this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
+                    manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
+                
             }
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -117,9 +123,8 @@ public class PacManScript : MonoBehaviour
                 _direction.x = -1f;
                 _direction.y = 0f;
                 this.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
-                if (_entered == null)
-                    this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
-                else this.transform.position = new Vector2(_entered.transform.position.x + 0.5f, _entered.transform.position.y + 0.5f);
+                this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
+                    manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
             }
         }
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -129,75 +134,53 @@ public class PacManScript : MonoBehaviour
                 _direction.x = 1f;
                 _direction.y = 0f;
                 this.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                if (_entered == null)
-                    this.transform.position = new Vector2(Mathf.Floor(this.transform.position.x) + 0.5f, Mathf.Floor(this.transform.position.y) + 0.5f);
-                else this.transform.position = new Vector2( _entered.transform.position.x + 0.5f,_entered.transform.position.y+0.5f );
+                this.transform.position = new Vector2(manager.floorMaker.Grid[_gIndex].transform.position.x + 0.5f,
+                    manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
+                
             }
         }
-        MoveMe();
 
 #elif (UNITY_ANDROID || UNITY_IOS)
         
 #endif
-    }
 
-    FloorTile _entered;
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        Debug.Log("Collided Gameobject name:"+collision.gameObject.name);
-        if (manager.gameState == GameSceneManager.GameState.GameStarted)
+        MoveMe();
+
+        /*Following is tile changing logic block*/
         {
-            if (collision.gameObject.tag == GameSceneManager.TILE_TAG)
+            if (manager.floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Concrete)
             {
-                _entered = collision.gameObject.GetComponent<FloorTile>();
-                
-                if (_entered.TileTypeGetSet == FloorTile.TileType.Concrete)
+                if (!onTheFloor)
                 {
-                    //_entered.gameObject.GetComponent<SpriteRenderer>().color = Color.red;                    
-
-                    onTheFloor = true;
+                    StopMe();
+                    manager.makeConcreteTiles();
                 }
-                else onTheFloor = false;
-
+                onTheFloor = true;
+            }
+            else
+            {
+                onTheFloor = false;
+                if (manager.floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Space)
+                {
+                    manager.floorMaker.Grid[_gIndex].TileTypeGetSet = FloorTile.TileType.Tentative;
+                    manager.addToTentativeList(manager.floorMaker.Grid[_gIndex]);
+                }
             }
         }
+
+
     }
 
-    FloorTile _exited;
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if ( manager.gameState == GameSceneManager.GameState.GameStarted )
-        {
-            if ( collision.gameObject.tag == GameSceneManager.TILE_TAG )
-            {
-                _exited = collision.gameObject.GetComponent<FloorTile>();
 
-                if (_exited != null)
-                {
-                    if (_exited.TileTypeGetSet != FloorTile.TileType.Concrete)
-                    {
-                        _exited.TileTypeGetSet = FloorTile.TileType.Tentative;
-                        manager.addToTentativeList(_exited);
-                        int Xindex = Mathf.FloorToInt(this.transform.position.x);
-                        int Yindex = Mathf.FloorToInt(this.transform.position.y);
-                        //Debug.Log("X:" + Xindex + " && Y:" + Yindex);
-                        FloorMaker.GridIndex _gIndex = new FloorMaker.GridIndex(Xindex,Yindex);
-                        if (manager.floorMaker.Grid.ContainsKey(_gIndex))
-                        {
-                            if (manager.floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Concrete)
-                            //if ( manager.floorMaker.Grid[_gIndex].GetComponent<SpriteRenderer>().bounds.Contains(this.transform.position) )
-                            {
-                                StopMe();
-                                manager.makeConcreteTiles();
-                            }                            
-                        }
-                    }
-                }
-            }            
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(GameSceneManager.LOGGING)
+        Debug.Log("Collided Gameobject name:" + collision.gameObject.name);
+        if (manager.gameState == GameSceneManager.GameState.GameStarted)
+        {
+            
         }
     }
-
-
 
 
 }
