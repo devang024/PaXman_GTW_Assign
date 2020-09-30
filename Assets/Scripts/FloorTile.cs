@@ -13,6 +13,11 @@ public class FloorTile : MonoBehaviour
         Space,
         Counting
     }
+    GameSceneManager _manager;
+    public void StartGame()
+    {
+        _manager = FindObjectOfType<GameSceneManager>();
+    }
 
     TileType _tileType = TileType.Space;
 
@@ -31,6 +36,7 @@ public class FloorTile : MonoBehaviour
                     {
                         GetComponent<SpriteRenderer>().color = Color.white;
                         GetComponent<BoxCollider2D>().isTrigger = false;
+                        
                     }
                     break;
 

@@ -34,6 +34,11 @@ public class PacManScript : MonoBehaviour
         
     }
 
+    public void StartGame()
+    {
+
+    }
+
     void MoveMe( )
     {        
         _tempPositionVector = this.transform.position;
@@ -129,6 +134,7 @@ public class PacManScript : MonoBehaviour
                         manager.floorMaker.Grid[_gIndex].transform.position.y + 0.5f);
                 }
             }
+
             if (Input.GetKeyDown(KeyCode.RightArrow))
             {
                 if (_direction.x == 0f || onTheFloor)

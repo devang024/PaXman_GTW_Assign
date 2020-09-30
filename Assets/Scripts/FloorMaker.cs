@@ -29,6 +29,12 @@ public class FloorMaker : MonoBehaviour
     //public FloorTile[,] Grid;
     public Dictionary<GridIndex, FloorTile> Grid;
 
+
+    public void StartGame()
+    {
+
+    }
+
     // Start is called before the first frame update
     void Start()
     {

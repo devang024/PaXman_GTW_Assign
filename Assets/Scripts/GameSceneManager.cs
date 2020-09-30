@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class GameSceneManager : MonoBehaviour
 {
+    public GameObject PrefabEnemy;
     public GameObject InstructionPanelUI;
     public Text Lives, Progress;
     public const bool LOGGING = false;
@@ -21,22 +22,62 @@ public class GameSceneManager : MonoBehaviour
     public FloorMaker floorMaker;
 
     public const string TILE_TAG = "FloorTile";
+    public const string ENEMY_TAG = "Enemy";
 
     List<FloorTile> TentativeTileList = new List<FloorTile>();
     int lives = 3;
 
+    public GameObject World;
+    public List<EnemyScript> Enemies;
+    public GameObject Player;
     public void StartGame()
     {
+        Enemies = new List<EnemyScript>();
         gameState = GameState.GameStarted;
         InstructionPanelUI.SetActive(false);
         Lives.text = "Lives : "+lives.ToString();
         checkGameEnd();
+        
+
+
+        World.BroadcastMessage("StartGame");
     }
 
     // Start is called before the first frame update
     void Start()
     {
         //Application.targetFrameRate = 60;
+        GameObject _obj;
+        for (int index = 0; index < 3; index++)
+        {
+            _obj = Instantiate(PrefabEnemy, World.transform) as GameObject;
+            if (_obj != null)
+            {
+                EnemyScript _enemyScript = _obj.GetComponent<EnemyScript>();
+                if (_enemyScript != null)
+                {
+                    _enemyScript.enemyType = EnemyScript.EnemyType.Slow;
+                    float _x = Random.Range(2, floorMaker.Rows - 2);
+                    float _y = Random.Range(2, floorMaker.Columns - 2);
+                    _obj.transform.position = new Vector3(_x, _y, _obj.transform.position.z);
+                    Enemies.Add(_enemyScript);
+                }
+            }
+        }
+        _obj = Instantiate(PrefabEnemy, World.transform) as GameObject;
+        if (_obj != null)
+        {
+            EnemyScript _enemyScript = _obj.GetComponent<EnemyScript>();
+            if (_enemyScript != null)
+            {
+                _enemyScript.enemyType = EnemyScript.EnemyType.Fast;
+                _obj.GetComponent<SpriteRenderer>().color = Color.yellow;
+                float _x = Random.Range(2, floorMaker.Rows - 2);
+                float _y = Random.Range(2, floorMaker.Columns - 2);
+                _obj.transform.position = new Vector3(_x, _y, _obj.transform.position.z);
+                Enemies.Add(_enemyScript);
+            }
+        }
     }
 
     [Range(0f,4f)]
@@ -45,6 +86,17 @@ public class GameSceneManager : MonoBehaviour
     void Update()
     {
         Time.timeScale = timeScale;
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if ( gameState == GameState.GameStarted )
+            {
+                gameState = GameState.GamePaused;
+            }
+            else if ( gameState == GameState.GamePaused )
+            {
+                gameState = GameState.GameStarted;
+            }
+        }
     }
 
     public void addToTentativeList(FloorTile _tileScript)
@@ -52,6 +104,32 @@ public class GameSceneManager : MonoBehaviour
         if ( _tileScript != null )
         {
             TentativeTileList.Add(_tileScript);
+        }
+    }
+
+    public void RestartTurn()
+    {
+        resettingGridForRestart();
+        Player.transform.position = new Vector3(0.5f,0.5f,Player.transform.position.z);
+        Player.transform.rotation = Quaternion.identity;
+    }
+
+    IEnumerator RestartCoRoutine()
+    {
+        gameState = GameState.GamePaused;
+
+        yield return null;
+    }
+
+    void resettingGridForRestart()
+    {
+        /**Resetting the counting tileType to default space tileType*/
+        foreach (var item in floorMaker.Grid)
+        {
+            if (item.Value.TileTypeGetSet == FloorTile.TileType.Tentative)
+            {
+                item.Value.TileTypeGetSet = FloorTile.TileType.Space;
+            }
         }
     }
 
@@ -81,6 +159,7 @@ public class GameSceneManager : MonoBehaviour
                 resettingGridAfterCounting();
                 _seed = getSeed(counter);
             }
+            counter++;
         }
 
         resettingGridAfterCounting();
