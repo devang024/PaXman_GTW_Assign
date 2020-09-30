@@ -25,7 +25,7 @@ public class EnemyScript : MonoBehaviour
     }
     Vector2 _velocity = new Vector2();
     public EnemyType enemyType = EnemyType.Slow;
-
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -33,19 +33,59 @@ public class EnemyScript : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
+    public void GamePausedEvent(bool _value)
+    {
+        gameRunning = _value;
+    }
+
+    int Xindex, Yindex;
+    FloorMaker.GridIndex _gIndex;
+    bool isTrapped = false;
+
     Vector3 _postion = Vector3.zero;
     // Update is called once per frame
     void Update()
     {
         this.transform.rotation = Quaternion.identity;
-        if ( gameRunning )
+        if ( gameRunning && !isTrapped )
         {
             _postion.x = this.transform.position.x + (_velocity.normalized.x * _speed);
             _postion.y = this.transform.position.y + (_velocity.normalized.y * _speed);
             this.transform.position = _postion;
+
+            Xindex = Mathf.FloorToInt(this.transform.position.x);
+            Yindex = Mathf.FloorToInt(this.transform.position.y);
+            _gIndex = new FloorMaker.GridIndex(Xindex, Yindex);
+
+            if (_floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Tentative)
+            {
+                FindObjectOfType<GameSceneManager>().RestartTurn();
+            }
+            else if (_floorMaker.Grid[_gIndex].TileTypeGetSet == FloorTile.TileType.Concrete)
+            {
+                isTrapped = true;                
+                GetComponent<Animator>().StopPlayback();
+                fadeAnimation();
+            }
+
         }
 
     }
+
+    void fadeAnimation()
+    {
+        Hashtable _hash = new Hashtable();
+        _hash.Add("time",2.5f);
+        _hash.Add("alpha",0.1f);
+        _hash.Add("oncomplete", "fadeComplete");
+        iTween.FadeTo(this.gameObject, _hash);
+    }
+
+    public void fadeComplete()
+    {
+        Destroy(this.gameObject);
+    }
+
 
     private void OnCollisionEnter2D(Collision2D collision)
     {

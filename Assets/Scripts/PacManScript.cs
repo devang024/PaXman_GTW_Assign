@@ -36,7 +36,7 @@ public class PacManScript : MonoBehaviour
 
     public void StartGame()
     {
-
+        gameRunning = true;
     }
 
     void MoveMe( )
@@ -84,16 +84,22 @@ public class PacManScript : MonoBehaviour
         this.transform.position = _tempPositionVector;
     }
 
+    bool gameRunning = false;
 
+    public void GamePausedEvent(bool _value)
+    {
+        gameRunning = _value;
+    }
 
     int Xindex, Yindex;
+    FloorMaker.GridIndex _gIndex;
     private void FixedUpdate()
     {
-        if ( manager.gameState == GameSceneManager.GameState.GameStarted )
+        if (gameRunning)
         {
             Xindex = Mathf.FloorToInt(this.transform.position.x);
             Yindex = Mathf.FloorToInt(this.transform.position.y);
-            FloorMaker.GridIndex _gIndex = new FloorMaker.GridIndex(Xindex, Yindex);
+            _gIndex = new FloorMaker.GridIndex(Xindex, Yindex);
 #if UNITY_EDITOR || UNITY_STANDALONE
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -173,6 +179,7 @@ public class PacManScript : MonoBehaviour
                         manager.floorMaker.Grid[_gIndex].TileTypeGetSet = FloorTile.TileType.Tentative;
                         manager.addToTentativeList(manager.floorMaker.Grid[_gIndex]);
                     }
+
                 }
             }
         }
@@ -185,9 +192,18 @@ public class PacManScript : MonoBehaviour
     {
         if(GameSceneManager.LOGGING)
         Debug.Log("Collided Gameobject name:" + collision.gameObject.name);
-        if (manager.gameState == GameSceneManager.GameState.GameStarted)
+
+        if ( collision.gameObject.tag == GameSceneManager.TILE_TAG )
         {
-            
+            FloorTile _tile = collision.gameObject.GetComponent<FloorTile>();
+            if ( _tile.TileTypeGetSet == FloorTile.TileType.Tentative)
+            {
+                manager.RestartTurn();
+            }
+        }
+        else if (collision.gameObject.tag == GameSceneManager.ENEMY_TAG)
+        {
+            manager.RestartTurn();
         }
     }
 

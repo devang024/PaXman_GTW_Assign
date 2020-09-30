@@ -30,13 +30,13 @@ public class FloorTile : MonoBehaviour
 
         set
         {
-            switch( value )
+            this._tileType = value;
+            switch ( value )
             {
                 case TileType.Concrete:
                     {
                         GetComponent<SpriteRenderer>().color = Color.white;
                         GetComponent<BoxCollider2D>().isTrigger = false;
-                        
                     }
                     break;
 
@@ -45,8 +45,14 @@ public class FloorTile : MonoBehaviour
                         GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.5f);
                     }
                     break;
+
+                case TileType.Space:
+                    {
+                        GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.0f);
+                    }
+                    break;
             }
-            this._tileType = value;
+            
         }
     }
 
@@ -78,6 +84,8 @@ public class FloorTile : MonoBehaviour
         
     }
 
-    
+
+
+
 
 }

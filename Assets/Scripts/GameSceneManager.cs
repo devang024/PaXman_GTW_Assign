@@ -7,6 +7,8 @@ public class GameSceneManager : MonoBehaviour
 {
     public GameObject PrefabEnemy;
     public GameObject InstructionPanelUI;
+    public GameObject GameOverPanelUI;
+
     public Text Lives, Progress;
     public const bool LOGGING = false;
     public enum GameState
@@ -23,16 +25,19 @@ public class GameSceneManager : MonoBehaviour
 
     public const string TILE_TAG = "FloorTile";
     public const string ENEMY_TAG = "Enemy";
+    public const string LIVES_KEY = "LIVES";
+
+    public const string PAUSE_EVENT = "GamePausedEvent";
 
     List<FloorTile> TentativeTileList = new List<FloorTile>();
     int lives = 3;
 
     public GameObject World;
-    public List<EnemyScript> Enemies;
+    //public List<EnemyScript> Enemies;
     public GameObject Player;
     public void StartGame()
     {
-        Enemies = new List<EnemyScript>();
+        //Enemies = new List<EnemyScript>();
         gameState = GameState.GameStarted;
         InstructionPanelUI.SetActive(false);
         Lives.text = "Lives : "+lives.ToString();
@@ -41,6 +46,17 @@ public class GameSceneManager : MonoBehaviour
 
 
         World.BroadcastMessage("StartGame");
+    }
+
+    private void Awake()
+    {
+        lives = PlayerPrefs.GetInt(LIVES_KEY, -1);
+        if ( lives < 3 )
+        {
+            PlayerPrefs.SetInt(LIVES_KEY,3);
+            lives = 3;
+            Lives.text = "Lives : " + lives;
+        }
     }
 
     // Start is called before the first frame update
@@ -60,7 +76,7 @@ public class GameSceneManager : MonoBehaviour
                     float _x = Random.Range(2, floorMaker.Rows - 2);
                     float _y = Random.Range(2, floorMaker.Columns - 2);
                     _obj.transform.position = new Vector3(_x, _y, _obj.transform.position.z);
-                    Enemies.Add(_enemyScript);
+                    //Enemies.Add(_enemyScript);
                 }
             }
         }
@@ -75,13 +91,16 @@ public class GameSceneManager : MonoBehaviour
                 float _x = Random.Range(2, floorMaker.Rows - 2);
                 float _y = Random.Range(2, floorMaker.Columns - 2);
                 _obj.transform.position = new Vector3(_x, _y, _obj.transform.position.z);
-                Enemies.Add(_enemyScript);
+                //Enemies.Add(_enemyScript);
             }
         }
     }
 
+
+
     [Range(0f,4f)]
     public float timeScale = 1.0f;
+
     // Update is called once per frame
     void Update()
     {
@@ -91,10 +110,12 @@ public class GameSceneManager : MonoBehaviour
             if ( gameState == GameState.GameStarted )
             {
                 gameState = GameState.GamePaused;
+                World.BroadcastMessage("GamePausedEvent", false);
             }
             else if ( gameState == GameState.GamePaused )
             {
                 gameState = GameState.GameStarted;
+                World.BroadcastMessage("GamePausedEvent", true);
             }
         }
     }
@@ -109,20 +130,41 @@ public class GameSceneManager : MonoBehaviour
 
     public void RestartTurn()
     {
-        resettingGridForRestart();
-        Player.transform.position = new Vector3(0.5f,0.5f,Player.transform.position.z);
-        Player.transform.rotation = Quaternion.identity;
+        if (gameState == GameState.GameStarted)
+        StartCoroutine(RestartCoRoutine());
     }
 
     IEnumerator RestartCoRoutine()
     {
         gameState = GameState.GamePaused;
+        World.BroadcastMessage(PAUSE_EVENT,false);
+        yield return new WaitForSeconds(3.0f);
+
+        resettingGridForRestart();
+        Player.transform.position = new Vector3(0.5f, 0.5f, Player.transform.position.z);
+        Player.transform.rotation = Quaternion.identity;
+        lives = lives - 1;
+        if ( lives < 0 )
+        {
+            GameOverPanelUI.SetActive(true);
+        }
+        else
+        {
+            Lives.text = "Lives : " + lives;
+            PlayerPrefs.SetInt(LIVES_KEY, lives);
+            gameState = GameState.GameStarted;
+            World.BroadcastMessage(PAUSE_EVENT, true);
+        }
+        
+        
+
 
         yield return null;
     }
 
     void resettingGridForRestart()
     {
+        TentativeTileList.Clear();
         /**Resetting the counting tileType to default space tileType*/
         foreach (var item in floorMaker.Grid)
         {
@@ -135,6 +177,7 @@ public class GameSceneManager : MonoBehaviour
 
     void resettingGridAfterCounting()
     {
+        
         /**Resetting the counting tileType to default space tileType*/
         foreach (var item in floorMaker.Grid)
         {
