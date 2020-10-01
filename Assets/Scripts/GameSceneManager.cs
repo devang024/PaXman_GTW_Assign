@@ -5,9 +5,11 @@ using UnityEngine.UI;
 
 public class GameSceneManager : MonoBehaviour
 {
+    public GameObject PrefabPowerUp;
     public GameObject PrefabEnemy;
     public GameObject InstructionPanelUI;
     public GameObject GameOverPanelUI;
+    public GameObject GameCompleteUI;
 
     public Text Lives, Progress;
     public const bool LOGGING = false;
@@ -25,6 +27,8 @@ public class GameSceneManager : MonoBehaviour
 
     public const string TILE_TAG = "FloorTile";
     public const string ENEMY_TAG = "Enemy";
+    public const string POWERUPS_TAG = "PowerUps";
+
     public const string LIVES_KEY = "LIVES";
 
     public const string PAUSE_EVENT = "GamePausedEvent";
@@ -35,6 +39,9 @@ public class GameSceneManager : MonoBehaviour
     public GameObject World;
     //public List<EnemyScript> Enemies;
     public GameObject Player;
+
+    public GameObject CurrentPowerUp;
+
     public void StartGame()
     {
         //Enemies = new List<EnemyScript>();
@@ -42,10 +49,9 @@ public class GameSceneManager : MonoBehaviour
         InstructionPanelUI.SetActive(false);
         Lives.text = "Lives : "+lives.ToString();
         checkGameEnd();
-        
-
 
         World.BroadcastMessage("StartGame");
+        Invoke("putPowerUp", Random.Range(7f, 16f));
     }
 
     private void Awake()
@@ -96,8 +102,6 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
-
-
     [Range(0f,4f)]
     public float timeScale = 1.0f;
 
@@ -105,18 +109,64 @@ public class GameSceneManager : MonoBehaviour
     void Update()
     {
         Time.timeScale = timeScale;
-        if (Input.GetKeyDown(KeyCode.Escape))
+        //if (Input.GetKeyDown(KeyCode.Escape))
+        //{
+        //    if ( gameState == GameState.GameStarted )
+        //    {
+        //        gameState = GameState.GamePaused;
+        //        World.BroadcastMessage("GamePausedEvent", false);
+        //    }
+        //    else if ( gameState == GameState.GamePaused )
+        //    {
+        //        gameState = GameState.GameStarted;
+        //        World.BroadcastMessage("GamePausedEvent", true);
+        //    }
+        //}
+    }
+
+    public void ApplySlowSpell()
+    {
+        bool _invokeDestroyPowerup = false;
+        EnemyScript[] _enemyScripts = FindObjectsOfType<EnemyScript>();
+        for( int index=0;index < _enemyScripts.Length; index++ )
         {
-            if ( gameState == GameState.GameStarted )
+            if ( _enemyScripts[index]!= null )
             {
-                gameState = GameState.GamePaused;
-                World.BroadcastMessage("GamePausedEvent", false);
+                _enemyScripts[index].SlowingSpell(3.5f);
+                _invokeDestroyPowerup = true;
             }
-            else if ( gameState == GameState.GamePaused )
+        }
+        if ( _invokeDestroyPowerup )
+        {
+            Invoke("DestroyCurrentPowerUp",3.5f);
+            _destroyActive = false;
+        }
+    }
+    bool _destroyActive = false;
+    void DestroyCurrentPowerUp()
+    {
+        if ( CurrentPowerUp != null )
+        {
+            if (CurrentPowerUp.activeSelf == _destroyActive)
+            Destroy(CurrentPowerUp);
+        }
+    }
+
+    void putPowerUp()
+    {
+        if ( gameState != GameState.GameFinished )
+        {
+            if (CurrentPowerUp == null)
             {
-                gameState = GameState.GameStarted;
-                World.BroadcastMessage("GamePausedEvent", true);
+                CurrentPowerUp = Instantiate(PrefabPowerUp, World.transform) as GameObject;
+                if (CurrentPowerUp != null)
+                {
+                    CurrentPowerUp.transform.position = new Vector3(Random.Range(0, floorMaker.Rows), Random.Range(0, floorMaker.Columns), 0.0f);
+                }
+                Invoke("DestroyCurrentPowerUp", 5.5f);
+                _destroyActive = true;
             }
+            Invoke("putPowerUp", Random.Range(7f, 12f));
         }
     }
 
@@ -232,14 +282,17 @@ public class GameSceneManager : MonoBehaviour
         }
 
         float progress = ((float)concreteCounter) / ((float)total);
-        Progress.text = "Progress : "+(Mathf.FloorToInt(progress * 100f)+ "/" + "80%");
+        Progress.text = "PROGRESS : "+(Mathf.FloorToInt(progress * 100f)+ "/" + "80%");
 
         if (progress >= 0.8f )
         {
             gameState = GameState.GameFinished;
+            World.BroadcastMessage(PAUSE_EVENT,false);
+            GameCompleteUI.SetActive(true);
+            if(LOGGING)
             Debug.LogError("GameFinished");
         }
-        else Debug.Log("Counter:"+concreteCounter);
+        else if(LOGGING) Debug.Log("Counter:"+concreteCounter);
     }
 
     FloorTile getSeed(int index)

@@ -33,6 +33,17 @@ public class EnemyScript : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
+    public void SlowingSpell(float _duration)
+    {
+        _slowSpell = 0.2f;
+        Invoke("backToNormal",_duration);
+    }
+
+    public void backToNormal()
+    {
+        _slowSpell = 1.0f;
+    }
+
     public void GamePausedEvent(bool _value)
     {
         gameRunning = _value;
@@ -42,6 +53,8 @@ public class EnemyScript : MonoBehaviour
     FloorMaker.GridIndex _gIndex;
     bool isTrapped = false;
 
+    float _slowSpell = 1.0f;
+
     Vector3 _postion = Vector3.zero;
     // Update is called once per frame
     void Update()
@@ -49,8 +62,8 @@ public class EnemyScript : MonoBehaviour
         this.transform.rotation = Quaternion.identity;
         if ( gameRunning && !isTrapped )
         {
-            _postion.x = this.transform.position.x + (_velocity.normalized.x * _speed);
-            _postion.y = this.transform.position.y + (_velocity.normalized.y * _speed);
+            _postion.x = this.transform.position.x + (_velocity.normalized.x * _speed* _slowSpell);
+            _postion.y = this.transform.position.y + (_velocity.normalized.y * _speed* _slowSpell);
             this.transform.position = _postion;
 
             Xindex = Mathf.FloorToInt(this.transform.position.x);
